@@ -1550,7 +1550,7 @@ function switchMaterial(id) {
 // ===== Tab切换 =====
 function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.overview-section, .study-section, .expense-section, .diet-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.overview-section, .work-section, .study-section, .expense-section, .diet-section, .joy-section').forEach(el => el.classList.remove('active'));
   
   const navItems = document.querySelectorAll('.nav-item');
   if (tab === 'overview') { navItems[0].classList.add('active'); document.getElementById('section-overview').classList.add('active'); renderOverview(); }
