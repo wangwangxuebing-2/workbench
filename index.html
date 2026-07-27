@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="我的工作台">
+<title>我的工作台</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+:root {
+  --primary: #667eea;
+  --primary-dark: #5568d3;
+  --bg: #f0f2f5;
+  --card-bg: #ffffff;
+  --text: #1a1a2e;
+  --text-light: #888;
+  --border: #e9ecef;
+  --green: #27ae60;
+  --orange: #e67e22;
+  --red: #e74c3c;
+  --blue: #3498db;
+  --purple: #9b59b6;
+}
+body {
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 顶部Header ===== */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px 20px 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(102,126,234,0.3);
+}
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+}
+.header .date {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+.header .countdown {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ===== 主体内容 ===== */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ===== Tab切换 ===== */
+.tabs {
+  display: flex;
+  background: #fff;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102,126,234,0.4);
+}
+
+/* ===== 卡片样式 ===== */
+.card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-title .icon {
+  font-size: 18px;
+}
+
+/* ===== 学习打卡模块 ===== */
+.study-section { display: none; }
+.study-section.active { display: block; }
+
+.study-timer {
+  text-align: center;
+  background: linear-gradient(135deg, #f0f0ff, #e8e8ff);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.timer-display {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+}
+.timer-label {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+.timer-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 32px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.timer-btn:active { transform: scale(0.95); }
+.timer-btn.running { background: var(--red); }
+.timer-btn.finished { background: var(--green); }
+
+.study-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.stat-item {
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+.week-calendar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.day-cell {
+  text-align: center;
+  flex: 1;
+}
+.day-label {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.day-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 4px auto;
+  background: #e9ecef;
+  color: #aaa;
+}
+.day-circle.done { background: var(--green); color: white; }
+.day-circle.today { border: 2px solid var(--primary); }
+
+.study-log {
+  margin-top: 10px;
+}
+.log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+.log-item:last-child { border-bottom: none; }
+.log-date { color: var(--text-light); }
+.log-duration { font-weight: 600; color: var(--primary); }
+
+/* ===== 花费记录模块 ===== */
+.expense-section { display: none; }
+.expense-section.active { display: block; }
+
+.expense-total {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.expense-total .amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--orange);
+}
+.expense-total .label {
+  font-size: 13px;
+  color: var(--text-light);
+}
+.expense-total .month-label {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.expense-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.expense-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.expense-input:focus { border-color: var(--orange); }
+.expense-amount-input {
+  width: 100px;
+  text-align: center;
+  font-weight: 600;
+}
+.expense-btn {
+  padding: 10px 20px;
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.expense-btn:active { transform: scale(0.95); }
+
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.cat-tag {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: #f0f0f5;
+  color: #666;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.cat-tag.selected {
+  background: var(--orange);
+  color: white;
+  border-color: var(--orange);
+}
+
+.expense-list {
+  margin-top: 10px;
+}
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.expense-item:last-child { border-bottom: none; }
+.expense-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.expense-cat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.expense-item-info {
+  display: flex;
+  flex-direction: column;
+}
+.expense-item-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.expense-item-time {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.expense-item-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--orange);
+}
+.expense-delete {
+  font-size: 18px;
+  color: #ccc;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+/* ===== 饮食记录模块 ===== */
+.diet-section { display: none; }
+.diet-section.active { display: block; }
+
+.diet-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.diet-stat {
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+.diet-stat .icon { font-size: 20px; }
+.diet-stat .value { font-size: 16px; font-weight: 700; margin-top: 4px; }
+.diet-stat .label { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+.meal-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.meal-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.meal-time {
+  font-size: 12px;
+  color: var(--text-light);
+}
+.meal-input-row {
+  display: flex;
+  gap: 8px;
+}
+.meal-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+.meal-input:focus { border-color: var(--green); }
+.meal-add-btn {
+  padding: 8px 16px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.meal-add-btn:active { transform: scale(0.95); }
+.meal-items {
+  margin-top: 8px;
+}
+.meal-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #f8f8f8;
+}
+.meal-item:last-child { border-bottom: none; }
+.meal-item-icon { font-size: 16px; }
+.meal-item-text { flex: 1; }
+.meal-item-del {
+  font-size: 16px;
+  color: #ddd;
+  cursor: pointer;
+}
+
+/* ===== 底部导航 ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+  z-index: 100;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.nav-item {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0 12px;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s;
+}
+.nav-item.active { color: var(--primary); }
+.nav-icon { font-size: 22px; }
+.nav-label { font-size: 11px; margin-top: 2px; }
+
+/* ===== 空状态 ===== */
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: #ccc;
+  font-size: 14px;
+}
+
+/* ===== 提示弹窗 ===== */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* ===== 使用说明 ===== */
+.guide-card {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.guide-card h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.guide-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+.guide-card .step {
+  margin: 4px 0;
+}
+
+/* ===== 智能提醒 ===== */
+.smart-alert {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.alert-warning {
+  background: #fff3e0;
+  border-left: 4px solid #e67e22;
+  color: #e65100;
+}
+.alert-danger {
+  background: #ffebee;
+  border-left: 4px solid #e74c3c;
+  color: #c62828;
+}
+.alert-success {
+  background: #e8f5e9;
+  border-left: 4px solid #27ae60;
+  color: #2e7d32;
+}
+.alert-info {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  color: #1565c0;
+}
+.alert-icon { font-size: 18px; flex-shrink: 0; }
+.alert-text { flex: 1; line-height: 1.5; }
+.alert-close {
+  font-size: 16px;
+  color: rgba(0,0,0,0.3);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* ===== 学习进度看板 ===== */
+.chapter-board {
+  margin-top: 4px;
+}
+
+/* ===== 学习资料样式 ===== */
+.mat-tab {
+  padding: 6px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f8f9fa;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.mat-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: #667eea;
+}
+.material-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 8px 0 6px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #f0f0f0;
+}
+.material-content p {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+.study-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 6px 0;
+}
+.study-table th {
+  background: #f0f0f5;
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 4px;
+}
+.study-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.study-table b {
+  color: #c0392b;
+}
+.highlight-box {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #856404;
+  line-height: 1.6;
+}
+
+/* ===== 幸运/开心事记录 ===== */
+.joy-section { display: none; }
+.joy-section.active { display: block; }
+.joy-input-card {
+  background: linear-gradient(135deg, #fff0f6, #ffe0ec);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.joy-textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 2px solid #f8bbd0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  background: white;
+  line-height: 1.6;
+}
+.joy-textarea:focus { border-color: #e91e63; }
+.joy-mood-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.mood-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 18px;
+  background: white;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+.mood-tag.selected {
+  border-color: #e91e63;
+  background: #fce4ec;
+  transform: scale(1.1);
+}
+.joy-add-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #e91e63, #f06292);
+  cursor: pointer;
+  margin-top: 8px;
+}
+.joy-add-btn:active { transform: scale(0.97); }
+.joy-item {
+  background: linear-gradient(135deg, #fff8fb, #fff0f6);
+  border-left: 3px solid #e91e63;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.joy-item-mood { font-size: 22px; margin-bottom: 4px; }
+.joy-item-text { font-size: 14px; color: #333; line-height: 1.6; }
+.joy-item-time { font-size: 11px; color: #bbb; margin-top: 6px; }
+.joy-item-del { position: absolute; top: 8px; right: 8px; font-size: 16px; color: #ddd; cursor: pointer; }
+.joy-calendar { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.joy-day { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: #f0f0f0; color: #aaa; }
+.joy-day.has-joy { background: linear-gradient(135deg, #e91e63, #f06292); color: white; }
+.joy-day.today { border: 2px solid #e91e63; }
+
+/* ===== 工作项目模块 ===== */
+.work-section { display: none; }
+.work-section.active { display: block; }
+.work-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.work-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+.work-input:focus { border-color: var(--blue); }
+.work-date-input {
+  width: 140px;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+.work-date-input:focus { border-color: var(--blue); }
+.work-add-btn {
+  padding: 10px 16px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.work-add-btn:active { transform: scale(0.95); }
+.work-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.work-item:last-child { border-bottom: none; }
+.work-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.work-check.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+.work-info { flex: 1; }
+.work-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+.work-name.done {
+  text-decoration: line-through;
+  color: #aaa;
+}
+.work-date {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+.work-date.urgent { color: var(--red); font-weight: 600; }
+.work-date.today { color: var(--orange); font-weight: 600; }
+.work-delete {
+  font-size: 16px;
+  color: #ddd;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.work-status-tag {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+.work-tag-pending { background: #fff3e0; color: #e67e22; }
+.work-tag-today { background: #e3f2fd; color: #1976d2; }
+.work-tag-overdue { background: #ffebee; color: #c62828; }
+.work-tag-done { background: #e8f5e9; color: #2e7d32; }
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.chapter-item:last-child { border-bottom: none; }
+.chapter-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: #e9ecef;
+  color: #999;
+}
+.chapter-num.done { background: var(--green); color: white; }
+.chapter-num.current { background: var(--primary); color: white; }
+.chapter-info { flex: 1; }
+.chapter-name { font-size: 14px; font-weight: 500; color: #333; }
+.chapter-status { font-size: 11px; color: #888; margin-top: 2px; }
+.chapter-progress {
+  width: 60px;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.chapter-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+
+/* ===== AI跳转按钮 ===== */
+.ai-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+.ai-btn:active { transform: scale(0.97); }
+.ai-btn .ai-icon { font-size: 18px; margin-right: 6px; }
+
+/* ===== 花费预算设置 ===== */
+.budget-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.budget-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+  outline: none;
+}
+.budget-input:focus { border-color: var(--orange); }
+.budget-label { color: var(--text-light); }
+.budget-save-btn {
+  padding: 6px 14px;
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== 概览首页 ===== */
+.overview-section { display: none; }
+.overview-section.active { display: block; }
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.overview-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  text-align: center;
+}
+.overview-card .icon { font-size: 28px; }
+.overview-card .value { font-size: 22px; font-weight: 700; margin-top: 6px; }
+.overview-card .label { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.overview-card .sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- 顶部Header -->
+<div class="header">
+  <h1>📋 我的工作台</h1>
+  <div class="date" id="todayDate">2026/07/27 星期一</div>
+  <div class="countdown" id="countdown">⏰ 一建市政备考倒计时 48 天</div>
+</div>
+
+<div class="container">
+
+  <!-- 使用引导（首次打开显示） -->
+  <div class="guide-card" id="guideCard">
+    <h3>📱 添加到手机桌面</h3>
+    <p>
+      <span class="step">1️⃣ 点击底部"分享"按钮</span><br>
+      <span class="step">2️⃣ 选择"添加到主屏幕"</span><br>
+      <span class="step">3️⃣ 桌面出现图标，点开即用</span><br>
+      <span class="step" style="margin-top:8px; opacity:0.8;">💡 数据保存在手机本地，不联网也能用</span>
+    </p>
+  </div>
+
+  <!-- ===== 概览首页模块 ===== -->
+  <div class="overview-section active" id="section-overview">
+
+    <!-- 智能提醒区 -->
+    <div id="smartAlerts"></div>
+
+    <!-- 概览卡片 -->
+    <div class="overview-grid">
+      <div class="overview-card" onclick="switchTab('study')">
+        <div class="icon">📚</div>
+        <div class="value" id="overviewStudy" style="color:#667eea;">0.0h</div>
+        <div class="label">今日学习</div>
+        <div class="sub" id="overviewStudyGoal">目标 5.0h</div>
+      </div>
+      <div class="overview-card" onclick="switchTab('expense')">
+        <div class="icon">💰</div>
+        <div class="value" id="overviewExpense" style="color:#e67e22;">¥0</div>
+        <div class="label">今日花费</div>
+        <div class="sub" id="overviewExpenseBudget">预算 ¥100</div>
+      </div>
+      <div class="overview-card" onclick="switchTab('diet')">
+        <div class="icon">🍎</div>
+        <div class="value" id="overviewDiet" style="color:#27ae60;">0</div>
+        <div class="label">今日饮食</div>
+        <div class="sub">已记录餐次</div>
+      </div>
+      <div class="overview-card" onclick="switchTab('study')">
+        <div class="icon">📖</div>
+        <div class="value" id="overviewChapter" style="color:#9b59b6;">第1章</div>
+        <div class="label">当前章节</div>
+        <div class="sub" id="overviewChapterProgress">进度 0%</div>
+      </div>
+      <div class="overview-card" onclick="switchTab('joy')">
+        <div class="icon">🌟</div>
+        <div class="value" id="overviewJoy" style="color:#e91e63;">0</div>
+        <div class="label">今日幸运</div>
+        <div class="sub">已记录</div>
+      </div>
+    </div>
+
+    <!-- 一键问AI -->
+    <div class="card" style="background: linear-gradient(135deg, #667eea, #764ba2); border:none;">
+      <div style="color:white; text-align:center; margin-bottom:10px; font-size:14px; font-weight:600;">
+        🤖 AI学习助手
+      </div>
+      <div style="color:rgba(255,255,255,0.9); font-size:13px; margin-bottom:12px; line-height:1.6; text-align:center;">
+        遇到不懂的知识点？需要生成下一章资料？<br>点击下方按钮直接对话AI
+      </div>
+      <button class="ai-btn" onclick="copyAIPrompt()" style="background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3);">
+        <span class="ai-icon">💬</span>一键复制AI对话指令
+      </button>
+    </div>
+
+    <!-- 一建章节进度看板 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📖</span> 一建市政 · 章节进度</div>
+      <div class="chapter-board" id="chapterBoard"></div>
+      <div style="margin-top:12px; padding:10px; background:#f8f9fa; border-radius:8px; font-size:12px; color:#666; text-align:center;">
+        💡 完成当前章节背诵后，在AI对话中说"第X章背诵完成"<br>回来这里点击"更新进度"按钮
+      </div>
+      <button class="ai-btn" onclick="copyNextChapterPrompt()" style="background:linear-gradient(135deg, #27ae60, #2ecc71); margin-top:10px;">
+        <span class="ai-icon">📝</span>复制"生成下一章"指令
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== 学习打卡模块 ===== -->
+  <div class="study-section" id="section-study">
+
+    <!-- 学习提醒 -->
+    <div id="studyAlerts"></div>
+    <!-- 计时器 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">⏱️</span> 学习计时</div>
+      <div class="study-timer">
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <div class="timer-label" id="timerLabel">点击开始计时</div>
+        <button class="timer-btn" id="timerBtn" onclick="toggleTimer()">开始学习</button>
+      </div>
+    </div>
+
+    <!-- 统计 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> 学习统计</div>
+      <div class="study-stats">
+        <div class="stat-item">
+          <div class="stat-value" id="todayHours">0.0h</div>
+          <div class="stat-label">今日学习</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="weekHours">0.0h</div>
+          <div class="stat-label">本周累计</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalDays">0</div>
+          <div class="stat-label">连续打卡</div>
+        </div>
+      </div>
+
+      <!-- 本周日历 -->
+      <div style="margin-top:12px;">
+        <div style="font-size:13px; font-weight:600; margin-bottom:8px;">📅 本周打卡</div>
+        <div class="week-calendar" id="weekCalendar"></div>
+      </div>
+    </div>
+
+    <!-- 学习记录 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📝</span> 近期记录</div>
+      <div class="study-log" id="studyLog">
+        <div class="empty-state">还没有学习记录<br>点击上方"开始学习"计时吧</div>
+      </div>
+    </div>
+
+    <!-- 学习资料 - 第一章知识点 -->
+    <div class="card" id="studyMaterialCard">
+      <div class="card-title"><span class="icon">📖</span> 第一章 · 城镇道路工程</div>
+      
+      <!-- 章节切换 -->
+      <div style="display:flex; gap:6px; margin-bottom:12px; overflow-x:auto;">
+        <button class="mat-tab active" onclick="switchMaterial('ch1-1')">1.1 道路分类</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-2')">1.2 路基施工</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-3')">1.3 基层施工</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-4')">1.4 沥青面层</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-5')">1.5 水泥路面</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-6')">1.6 季节施工</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-7')">1.7 质量检验</button>
+        <button class="mat-tab" onclick="switchMaterial('ch1-8')">🔥 速记表</button>
+      </div>
+
+      <!-- 1.1 道路分类 -->
+      <div class="material-content" id="mat-ch1-1">
+        <h3>🔴 一、道路分类与路面结构</h3>
+        
+        <p style="font-size:14px; font-weight:600; margin:8px 0 4px;">道路分类（按功能）</p>
+        <table class="study-table">
+          <tr><th>类型</th><th>功能</th><th>特征</th></tr>
+          <tr><td><b>快速路</b></td><td>完全交通</td><td>中央分隔、全控制出入、单向≥2车道</td></tr>
+          <tr><td><b>主干路</b></td><td>交通干路</td><td>连接各分区，以交通功能为主</td></tr>
+          <tr><td><b>次干路</b></td><td>集散交通</td><td>交通+服务功能，配合主干路</td></tr>
+          <tr><td><b>支路</b></td><td>服务为主</td><td>解决局部交通，以服务功能为主</td></tr>
+        </table>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">路面结构层次（自上而下）</p>
+        <table class="study-table">
+          <tr><th>层次</th><th>功能</th><th>技术要求</th></tr>
+          <tr><td><b>面层</b></td><td>承受行车荷载</td><td>强度、刚度、耐磨、抗滑、平整、不透水、温度稳定性</td></tr>
+          <tr><td><b>基层</b></td><td>承重层</td><td>足够强度刚度、水稳性、抗冲刷</td></tr>
+          <tr><td><b>垫层</b></td><td>改善湿度温度</td><td>湿软土基/冰冻区设置</td></tr>
+        </table>
+
+        <div class="highlight-box">⚡ 柔性路面（沥青）：弯沉变形大、抗弯拉小 ｜ 刚性路面（水泥混凝土）：抗弯拉强度高、板体性强</div>
+        <div class="highlight-box">🎯 柔性设计指标=弯沉值；刚性设计指标=抗弯拉强度</div>
+      </div>
+
+      <!-- 1.2 路基施工 -->
+      <div class="material-content" id="mat-ch1-2" style="display:none;">
+        <h3>🔵 二、路基施工技术</h3>
+
+        <p style="font-size:14px; font-weight:600; margin:8px 0 4px;">土工试验必做项（口诀"一天两限标C验"）</p>
+        <div class="highlight-box">天然含水量 → 液限 → 塑限 → 标准击实 → CBR试验</div>
+        <p style="font-size:12px; color:#888; margin:4px 0;">⚠️ "液性指数""塑性指数"是干扰项</p>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">填料强度CBR（口诀"8543"）</p>
+        <table class="study-table">
+          <tr><th>位置</th><th>深度</th><th>CBR最小</th></tr>
+          <tr><td>上路床</td><td>0~30cm</td><td><b>8.0%</b></td></tr>
+          <tr><td>下路床</td><td>30~80cm</td><td><b>5.0%</b></td></tr>
+          <tr><td>上路堤</td><td>80~150cm</td><td><b>4.0%</b></td></tr>
+          <tr><td>下路堤</td><td>>150cm</td><td><b>3.0%</b></td></tr>
+        </table>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">禁用填料</p>
+        <p style="font-size:13px; line-height:1.7;">腐殖土、生活垃圾土、淤泥、冻土块、盐渍土、含草皮树根的土</p>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">碾压五原则</p>
+        <div class="highlight-box">先轻后重 → 先静后振 → 先低后高 → 先慢后快 → 轮迹重叠</div>
+        <p style="font-size:13px; margin:4px 0;">• 压路机速度 ≤4km/h<br>• 末遍碾压 ≥12t<br>• 小型夯压机重叠 1/4~1/3</p>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">管涵保护</p>
+        <p style="font-size:13px; line-height:1.7;">• 管顶填土 ≥500mm 才能碾压<br>• 覆土 <500mm 用素混凝土包裹过街雨水支管<br>• 地面横坡陡于1:5时修台阶，高度≤300mm，宽度≥1.0m</p>
+
+        <div class="highlight-box">🎯 路基质量主控项目：压实度 + 弯沉值</div>
+      </div>
+
+      <!-- 1.3 基层施工 -->
+      <div class="material-content" id="mat-ch1-3" style="display:none;">
+        <h3>🟢 三、基层施工技术</h3>
+
+        <table class="study-table">
+          <tr><th>类型</th><th>适用</th><th>关键参数</th><th>养护</th></tr>
+          <tr><td><b>石灰稳定土</b></td><td>次干路、支路</td><td>压实厚100~200mm</td><td>7d，封闭交通</td></tr>
+          <tr><td><b>水泥稳定土</b></td><td>各级道路</td><td>初凝≥3h、终凝≥6h、拌至铺≤3h</td><td>≥7d</td></tr>
+          <tr><td><b>二灰稳定土</b></td><td>各级道路</td><td>抗冻抗裂优于石灰土，早期强度低</td><td>7d湿养</td></tr>
+          <tr><td><b>级配碎石</b></td><td>—</td><td>碾压至无明显轮迹</td><td>24h内封层</td></tr>
+        </table>
+
+        <div class="highlight-box">⚠️ 石灰稳定土严禁用于高等级路面基层！</div>
+        <div class="highlight-box">⚠️ 不得采用薄层贴补找平！</div>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">基层质量主控项目（6项）</p>
+        <p style="font-size:13px; line-height:1.8;">① 集料级配 ② 配合比 ③ 含水量 ④ 拌合均匀性 ⑤ 压实度 ⑥ <b>7d无侧限抗压强度</b></p>
+      </div>
+
+      <!-- 1.4 沥青面层 -->
+      <div class="material-content" id="mat-ch1-4" style="display:none;">
+        <h3>🟠 四、沥青混合料面层 🔥必背</h3>
+
+        <p style="font-size:14px; font-weight:600; margin:8px 0 4px;">混合料类型</p>
+        <table class="study-table">
+          <tr><th>类型</th><th>特点</th></tr>
+          <tr><td><b>AC</b></td><td>密集配，耐久、平整</td></tr>
+          <tr><td><b>SMA</b></td><td>骨架密实，抗滑、抗车辙</td></tr>
+          <tr><td><b>OGFC</b></td><td>开级配，排水降噪</td></tr>
+        </table>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">🔥 施工温度（必背！）</p>
+        <div class="highlight-box" style="font-size:14px;">
+        <b>摊铺</b>：普通≥135℃ / 改性≥160℃<br>
+        <b>初压</b>：钢轮 110~140℃ 静压2遍<br>
+        <b>复压</b>：振动/轮胎 90~110℃ 4~6遍<br>
+        <b>终压</b>：钢轮 70~90℃ 至无轮迹<br>
+        <b>开放交通</b>：表面温度 <50℃
+        </div>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">摊铺要点</p>
+        <p style="font-size:13px; line-height:1.7;">• 速度 2~6m/min，缓慢均匀连续<br>• 双机并列梯队作业，错开10~20m<br>• 不得随意变换速度或中途停顿</p>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">接缝</p>
+        <p style="font-size:13px; line-height:1.7;">• 热接缝：跨缝碾压<br>• 冷接缝：刨毛→涂粘层油→新料铺筑→跨缝压实<br>• 严禁：薄层贴补、冷接茬、急刹车、掉头</p>
+      </div>
+
+      <!-- 1.5 水泥路面 -->
+      <div class="material-content" id="mat-ch1-5" style="display:none;">
+        <h3>🟣 五、水泥混凝土路面</h3>
+
+        <p style="font-size:14px; font-weight:600; margin:8px 0 4px;">配合比</p>
+        <div class="highlight-box">满足：弯拉强度、工作性、耐久性（注意：不是抗压强度！）</div>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">振捣顺序</p>
+        <p style="font-size:13px;">插入式振捣 → 平板振捣 → 振动梁整平</p>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">接缝构造 🔥必背</p>
+        <table class="study-table">
+          <tr><th>接缝</th><th>钢筋</th><th>类型</th><th>规格</th></tr>
+          <tr><td><b>胀缝</b></td><td>传力杆</td><td><b>光圆</b>钢筋</td><td>间距300mm</td></tr>
+          <tr><td><b>缩缝</b></td><td>—</td><td>—</td><td>切缝4~12h，宽5~6mm，深1/3~1/4板厚</td></tr>
+          <tr><td><b>纵缝</b></td><td>拉杆</td><td><b>螺纹</b>钢筋</td><td>—</td></tr>
+        </table>
+        <div class="highlight-box">口诀：胀传光三（胀缝→传力杆→光圆→300mm）｜纵拉螺（纵缝→拉杆→螺纹）</div>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">养护</p>
+        <div class="highlight-box">保湿14~21d；强度40%可行人，100%开放交通</div>
+      </div>
+
+      <!-- 1.6 季节施工 -->
+      <div class="material-content" id="mat-ch1-6" style="display:none;">
+        <h3>🟡 六、季节性施工</h3>
+
+        <p style="font-size:14px; font-weight:600; margin:8px 0 4px;">冬期判定</p>
+        <div class="highlight-box">日均气温连续5d <5℃ 或最低 <-3℃</div>
+
+        <table class="study-table">
+          <tr><th>部位</th><th>冬期</th><th>雨期</th></tr>
+          <tr><td><b>路基</b></td><td>冻土块≤15%，粒径<100mm</td><td>分段开挖、及时碾压、当天完工</td></tr>
+          <tr><td><b>基层</b></td><td>一般不宜施工</td><td>当日摊铺当日碾压</td></tr>
+          <tr><td><b>沥青面层</b></td><td>温度提高10~20℃，覆盖保温，≥5℃施工</td><td><b>遇雨停工</b>，已铺段加紧碾压</td></tr>
+          <tr><td><b>水泥混凝土</b></td><td>掺早强剂，加热水骨料，养护≥5℃</td><td>防雨水冲刷</td></tr>
+        </table>
+      </div>
+
+      <!-- 1.7 质量检验 -->
+      <div class="material-content" id="mat-ch1-7" style="display:none;">
+        <h3>🔍 七、质量检验与验收</h3>
+
+        <p style="font-size:14px; font-weight:600; margin:8px 0 4px;">各层主控项目</p>
+        <table class="study-table">
+          <tr><th>层次</th><th>主控项目</th></tr>
+          <tr><td><b>路基</b></td><td>压实度、弯沉值</td></tr>
+          <tr><td><b>基层</b></td><td>集料级配、配合比、含水量、拌合均匀性、压实度、7d无侧限抗压强度</td></tr>
+          <tr><td><b>沥青面层</b></td><td>厚度、弯沉值、压实度、抗滑性能</td></tr>
+          <tr><td><b>水泥面层</b></td><td>抗折（弯拉）强度、厚度、平整度</td></tr>
+        </table>
+
+        <p style="font-size:14px; font-weight:600; margin:12px 0 4px;">压实度检测方法</p>
+        <table class="study-table">
+          <tr><th>方法</th><th>适用</th></tr>
+          <tr><td><b>环刀法</b></td><td>细粒土</td></tr>
+          <tr><td><b>灌砂法</b></td><td>各类土（最常用）</td></tr>
+          <tr><td><b>灌水法</b></td><td>粗粒土、碎石土</td></tr>
+        </table>
+      </div>
+
+      <!-- 速记表 -->
+      <div class="material-content" id="mat-ch1-8" style="display:none;">
+        <h3>🔥 高频考点速记表</h3>
+        <table class="study-table" style="font-size:12px;">
+          <tr><th>考点</th><th>关键数值/口诀</th></tr>
+          <tr><td>CBR值</td><td><b>8/5/4/3%</b> "8543"</td></tr>
+          <tr><td>土工试验</td><td>"一天两限标C验"</td></tr>
+          <tr><td>碾压原则</td><td>先轻后重、先静后振、先低后高、先慢后快、轮迹重叠</td></tr>
+          <tr><td>压路机速度</td><td>≤4km/h</td></tr>
+          <tr><td>末遍碾压</td><td>≥12t</td></tr>
+          <tr><td>小型夯压机</td><td>重叠1/4~1/3</td></tr>
+          <tr><td>管涵保护</td><td>≥500mm碾压；<500mm素混凝土</td></tr>
+          <tr><td>试验段</td><td>"预沉虚铺三压实"</td></tr>
+          <tr><td>石灰稳定土</td><td>次干路支路，严禁高等级</td></tr>
+          <tr><td>水泥稳定土</td><td>初凝≥3h、终凝≥6h、≤3h</td></tr>
+          <tr><td>基层主控</td><td>6项，含7d无侧限抗压强度</td></tr>
+          <tr><td>沥青摊铺</td><td>普通≥135℃、改性≥160℃</td></tr>
+          <tr><td>沥青初压</td><td>110~140℃ 钢轮 2遍</td></tr>
+          <tr><td>沥青复压</td><td>90~110℃ 4~6遍</td></tr>
+          <tr><td>沥青终压</td><td>70~90℃ 至无轮迹</td></tr>
+          <tr><td>开放交通</td><td><50℃</td></tr>
+          <tr><td>摊铺速度</td><td>2~6m/min</td></tr>
+          <tr><td>梯队作业</td><td>错开10~20m 热接缝</td></tr>
+          <tr><td>水泥设计</td><td>弯拉强度（非抗压！）</td></tr>
+          <tr><td>胀缝</td><td>传力杆 光圆 300mm "胀传光三"</td></tr>
+          <tr><td>纵缝</td><td>拉杆 螺纹 "纵拉螺"</td></tr>
+          <tr><td>缩缝</td><td>切缝4~12h 深1/3~1/4</td></tr>
+          <tr><td>养护</td><td>14~21d；40%行人 100%通车</td></tr>
+          <tr><td>冬期判定</td><td>连续5d<5℃或<-3℃</td></tr>
+          <tr><td>冻土块</td><td>≤15%</td></tr>
+          <tr><td>雨期沥青</td><td>遇雨停工</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== 花费记录模块 ===== -->
+  <div class="expense-section" id="section-expense">
+
+    <!-- 今日花费总计 -->
+    <div class="card">
+      <div class="expense-total">
+        <div class="label">今日花费</div>
+        <div class="amount" id="todayExpense">¥0.00</div>
+        <div class="month-label" id="monthExpense">本月累计 ¥0.00</div>
+      </div>
+    </div>
+
+    <!-- 添加花费 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">💰</span> 记一笔</div>
+      <div class="category-tags" id="categoryTags">
+        <span class="cat-tag selected" data-cat="餐饮" data-icon="🍜">🍜 餐饮</span>
+        <span class="cat-tag" data-cat="交通" data-icon="🚌">🚌 交通</span>
+        <span class="cat-tag" data-cat="购物" data-icon="🛒">🛒 购物</span>
+        <span class="cat-tag" data-cat="学习" data-icon="📚">📚 学习</span>
+        <span class="cat-tag" data-cat="日用" data-icon="🏠">🏠 日用</span>
+        <span class="cat-tag" data-cat="其他" data-icon="📦">📦 其他</span>
+      </div>
+      <div class="expense-input-row">
+        <input type="text" class="expense-input" id="expenseName" placeholder="花了什么" maxlength="20">
+        <input type="number" class="expense-input expense-amount-input" id="expenseAmount" placeholder="¥金额" step="0.01" min="0">
+        <button class="expense-btn" onclick="addExpense()">记一笔</button>
+      </div>
+    </div>
+
+    <!-- 今日花费明细 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> 今日明细</div>
+      <div class="expense-list" id="expenseList">
+        <div class="empty-state">今日还没有记录<br>记一笔试试吧</div>
+      </div>
+      <!-- 花费预算设置 -->
+      <div class="budget-row">
+        <span class="budget-label">每日预算：</span>
+        <input type="number" class="budget-input" id="budgetInput" placeholder="¥100" step="1" min="0">
+        <button class="budget-save-btn" onclick="saveBudget()">设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 饮食记录模块 ===== -->
+  <div class="diet-section" id="section-diet">
+
+    <!-- 今日饮食概览 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🍎</span> 今日饮食</div>
+      <div class="diet-summary">
+        <div class="diet-stat">
+          <div class="icon">🌅</div>
+          <div class="value" id="breakfastCount">0</div>
+          <div class="label">早餐</div>
+        </div>
+        <div class="diet-stat">
+          <div class="icon">☀️</div>
+          <div class="value" id="lunchCount">0</div>
+          <div class="label">午餐</div>
+        </div>
+        <div class="diet-stat">
+          <div class="icon">🌙</div>
+          <div class="value" id="dinnerCount">0</div>
+          <div class="label">晚餐</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 早餐 -->
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-title">🌅 早餐</div>
+        <div class="meal-time" id="breakfastTime">--:--</div>
+      </div>
+      <div class="meal-input-row">
+        <input type="text" class="meal-input" id="breakfastInput" placeholder="吃了什么" maxlength="30">
+        <button class="meal-add-btn" onclick="addMeal('breakfast')">添加</button>
+      </div>
+      <div class="meal-items" id="breakfastItems"></div>
+    </div>
+
+    <!-- 午餐 -->
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-title">☀️ 午餐</div>
+        <div class="meal-time" id="lunchTime">--:--</div>
+      </div>
+      <div class="meal-input-row">
+        <input type="text" class="meal-input" id="lunchInput" placeholder="吃了什么" maxlength="30">
+        <button class="meal-add-btn" onclick="addMeal('lunch')">添加</button>
+      </div>
+      <div class="meal-items" id="lunchItems"></div>
+    </div>
+
+    <!-- 晚餐 -->
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-title">🌙 晚餐</div>
+        <div class="meal-time" id="dinnerTime">--:--</div>
+      </div>
+      <div class="meal-input-row">
+        <input type="text" class="meal-input" id="dinnerInput" placeholder="吃了什么" maxlength="30">
+        <button class="meal-add-btn" onclick="addMeal('dinner')">添加</button>
+      </div>
+      <div class="meal-items" id="dinnerItems"></div>
+    </div>
+
+    <!-- 加餐/零食 -->
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-title">🍿 加餐/零食</div>
+        <div class="meal-time" id="snackTime">--:--</div>
+      </div>
+      <div class="meal-input-row">
+        <input type="text" class="meal-input" id="snackInput" placeholder="吃了什么" maxlength="30">
+        <button class="meal-add-btn" onclick="addMeal('snack')">添加</button>
+      </div>
+      <div class="meal-items" id="snackItems"></div>
+    </div>
+  </div>
+
+  <!-- ===== 工作项目模块 ===== -->
+  <div class="work-section" id="section-work">
+
+    <!-- 添加工作项 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> 添加工作项</div>
+      <input type="text" class="work-input" id="workInput" placeholder="项目名称，比如：XX商场消防检测" maxlength="40" style="width:100%; margin-bottom:8px;">
+      <div class="work-input-row">
+        <input type="date" class="work-date-input" id="workDate">
+        <input type="text" class="work-input" id="workNote" placeholder="备注（可选）" maxlength="30">
+        <button class="work-add-btn" onclick="addWork()">添加</button>
+      </div>
+    </div>
+
+    <!-- 工作列表 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🔧</span> 我的工作项</div>
+      <div id="workList">
+        <div class="empty-state">还没有工作项<br>添加一个项目开始记录吧</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 幸运/开心事记录模块 ===== -->
+  <div class="joy-section" id="section-joy">
+
+    <!-- 记录区 -->
+    <div class="card">
+      <div class="joy-input-card">
+        <div style="font-size:15px; font-weight:700; margin-bottom:8px; color:#c2185b;">🌟 今天有什么幸运或开心的事？</div>
+        <textarea class="joy-textarea" id="joyInput" placeholder="比如：今天路上绿灯一路畅通、午饭特别好吃、学会了一个知识点..." maxlength="200"></textarea>
+        <div style="font-size:12px; color:#aaa; margin-top:4px;">心情：<span id="moodHint">点选一个表情</span></div>
+        <div class="joy-mood-tags" id="moodTags">
+          <span class="mood-tag" data-mood="😄">😄</span>
+          <span class="mood-tag" data-mood="🥰">🥰</span>
+          <span class="mood-tag" data-mood="😎">😎</span>
+          <span class="mood-tag" data-mood="🤩">🤩</span>
+          <span class="mood-tag" data-mood="😊">😊</span>
+          <span class="mood-tag" data-mood="💪">💪</span>
+          <span class="mood-tag" data-mood="🍀">🍀</span>
+        </div>
+        <button class="joy-add-btn" onclick="addJoy()">记录下来</button>
+      </div>
+    </div>
+
+    <!-- 今日记录 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🌟</span> 今日幸运 <span class="joy-count-badge" id="joyCount">0</span></div>
+      <div id="joyList">
+        <div class="empty-state">今天还没有记录<br>记录一件幸运的事吧 ✨</div>
+      </div>
+    </div>
+
+    <!-- 本月幸运日历 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📅</span> 本月幸运日</div>
+      <div style="font-size:13px; color:#888; margin-bottom:4px;">粉色 = 有幸运记录的日子</div>
+      <div class="joy-calendar" id="joyCalendar"></div>
+    </div>
+
+    <!-- 历史记录 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📖</span> 幸运回忆</div>
+      <div id="joyHistory">
+        <div class="empty-state">还没有回忆<br>记录的幸运事会出现在这里</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 底部导航 -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchTab('overview')">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label">概览</div>
+  </div>
+  <div class="nav-item" onclick="switchTab('work')">
+    <div class="nav-icon">🔧</div>
+    <div class="nav-label">工作</div>
+  </div>
+  <div class="nav-item" onclick="switchTab('study')">
+    <div class="nav-icon">📚</div>
+    <div class="nav-label">学习</div>
+  </div>
+  <div class="nav-item" onclick="switchTab('expense')">
+    <div class="nav-icon">💰</div>
+    <div class="nav-label">花费</div>
+  </div>
+  <div class="nav-item" onclick="switchTab('diet')">
+    <div class="nav-icon">🍎</div>
+    <div class="nav-label">饮食</div>
+  </div>
+  <div class="nav-item" onclick="switchTab('joy')">
+    <div class="nav-icon">🌟</div>
+    <div class="nav-label">幸运</div>
+  </div>
+</div>
+
+<!-- Toast提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 工具函数 =====
+function getDateKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + 
+    String(d.getMonth()+1).padStart(2,'0') + '-' + 
+    String(d.getDate()).padStart(2,'0');
+}
+function getMonthKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function formatDateDisplay() {
+  const d = new Date();
+  const weekdays = ['日','一','二','三','四','五','六'];
+  return d.getFullYear() + '/' + 
+    String(d.getMonth()+1).padStart(2,'0') + '/' + 
+    String(d.getDate()).padStart(2,'0') + ' 星期' + weekdays[d.getDay()];
+}
+function formatTime() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function loadJSON(key, defaultVal) {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : defaultVal;
+  } catch(e) { return defaultVal; }
+}
+function saveJSON(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+// ===== 考试倒计时 =====
+function updateCountdown() {
+  const examDate = new Date('2026-09-13');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const days = Math.ceil((examDate - today) / (1000*60*60*24));
+  document.getElementById('countdown').textContent = '⏰ 一建市政备考倒计时 ' + days + ' 天';
+  document.getElementById('todayDate').textContent = formatDateDisplay();
+}
+
+// ===== 学习资料切换 =====
+function switchMaterial(id) {
+  document.querySelectorAll('.material-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.mat-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('mat-' + id).style.display = 'block';
+  // 找到对应按钮并激活
+  event && event.target && event.target.classList.add('active');
+}
+
+// ===== Tab切换 =====
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.overview-section, .study-section, .expense-section, .diet-section').forEach(el => el.classList.remove('active'));
+  
+  const navItems = document.querySelectorAll('.nav-item');
+  if (tab === 'overview') { navItems[0].classList.add('active'); document.getElementById('section-overview').classList.add('active'); renderOverview(); }
+  if (tab === 'work') { navItems[1].classList.add('active'); document.getElementById('section-work').classList.add('active'); renderWork(); }
+  if (tab === 'study') { navItems[2].classList.add('active'); document.getElementById('section-study').classList.add('active'); renderStudyAlerts(); }
+  if (tab === 'expense') { navItems[3].classList.add('active'); document.getElementById('section-expense').classList.add('active'); renderExpenses(); }
+  if (tab === 'diet') { navItems[4].classList.add('active'); document.getElementById('section-diet').classList.add('active'); renderMeals(); }
+  if (tab === 'joy') { navItems[5].classList.add('active'); document.getElementById('section-joy').classList.add('active'); renderJoy(); }
+}
+
+// ===== 工作项目 =====
+function addWork() {
+  const name = document.getElementById('workInput').value.trim();
+  const date = document.getElementById('workDate').value;
+  const note = document.getElementById('workNote').value.trim();
+  
+  if (!name) { showToast('请输入项目名称'); return; }
+  if (!date) { showToast('请选择日期'); return; }
+  
+  let workData = loadJSON('work_data', []);
+  workData.push({
+    id: Date.now(),
+    name: name,
+    date: date,
+    note: note,
+    done: false,
+    created: formatTime()
+  });
+  workData.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return a.date.localeCompare(b.date);
+  });
+  saveJSON('work_data', workData);
+  
+  document.getElementById('workInput').value = '';
+  document.getElementById('workDate').value = '';
+  document.getElementById('workNote').value = '';
+  
+  renderWork();
+  showToast('✅ 已添加工作项');
+}
+
+function toggleWork(id) {
+  let workData = loadJSON('work_data', []);
+  const item = workData.find(w => w.id === id);
+  if (item) {
+    item.done = !item.done;
+    workData.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      return a.date.localeCompare(b.date);
+    });
+    saveJSON('work_data', workData);
+    renderWork();
+    showToast(item.done ? '✅ 已标记完成' : '已取消完成');
+  }
+}
+
+function deleteWork(id) {
+  let workData = loadJSON('work_data', []);
+  workData = workData.filter(w => w.id !== id);
+  saveJSON('work_data', workData);
+  renderWork();
+  showToast('已删除');
+}
+
+function renderWork() {
+  let workData = loadJSON('work_data', []);
+  const todayKey = getDateKey();
+  
+  if (workData.length === 0) {
+    document.getElementById('workList').innerHTML = '<div class="empty-state">还没有工作项<br>添加一个项目开始记录吧</div>';
+    return;
+  }
+  
+  let html = '';
+  workData.forEach(item => {
+    const isDone = item.done;
+    const isToday = (item.date === todayKey);
+    const isOverdue = !isDone && item.date < todayKey;
+    
+    let dateLabel = item.date.slice(5).replace('-','/');
+    let dateClass = 'work-date';
+    let statusTag = '';
+    
+    if (isDone) {
+      statusTag = '<span class="work-status-tag work-tag-done">已完成</span>';
+    } else if (isOverdue) {
+      dateClass += ' urgent';
+      statusTag = '<span class="work-status-tag work-tag-overdue">已逾期</span>';
+    } else if (isToday) {
+      dateClass += ' today';
+      statusTag = '<span class="work-status-tag work-tag-today">今天</span>';
+    } else {
+      statusTag = '<span class="work-status-tag work-tag-pending">待办</span>';
+    }
+    
+    let noteHtml = item.note ? '<div style="font-size:12px; color:#999; margin-top:2px;">📝 ' + item.note + '</div>' : '';
+    
+    html += '<div class="work-item">';
+    html += '<div class="work-check' + (isDone ? ' done' : '') + '" onclick="toggleWork(' + item.id + ')">' + (isDone ? '✓' : '') + '</div>';
+    html += '<div class="work-info"><div class="work-name' + (isDone ? ' done' : '') + '">' + item.name + statusTag + '</div><div class="' + dateClass + '">📅 ' + dateLabel + '</div>' + noteHtml + '</div>';
+    html += '<span class="work-delete" onclick="deleteWork(' + item.id + ')">✕</span>';
+    html += '</div>';
+  });
+  document.getElementById('workList').innerHTML = html;
+}
+
+// ===== 幸运/开心事记录 =====
+let selectedMood = '';
+
+document.querySelectorAll('.mood-tag').forEach(tag => {
+  tag.addEventListener('click', function() {
+    document.querySelectorAll('.mood-tag').forEach(t => t.classList.remove('selected'));
+    this.classList.add('selected');
+    selectedMood = this.dataset.mood;
+    document.getElementById('moodHint').textContent = selectedMood + ' 已选';
+  });
+});
+
+function addJoy() {
+  const text = document.getElementById('joyInput').value.trim();
+  if (!text) { showToast('写点什么吧'); return; }
+  
+  const dateKey = getDateKey();
+  let joyData = loadJSON('joy_data', {});
+  if (!joyData[dateKey]) joyData[dateKey] = [];
+  
+  joyData[dateKey].push({
+    text: text,
+    mood: selectedMood || '😊',
+    time: formatTime()
+  });
+  saveJSON('joy_data', joyData);
+  
+  document.getElementById('joyInput').value = '';
+  document.querySelectorAll('.mood-tag').forEach(t => t.classList.remove('selected'));
+  selectedMood = '';
+  document.getElementById('moodHint').textContent = '点选一个表情';
+  
+  renderJoy();
+  showToast('🌟 已记录今天的幸运！');
+}
+
+function deleteJoy(idx) {
+  const dateKey = getDateKey();
+  let joyData = loadJSON('joy_data', {});
+  if (joyData[dateKey]) {
+    joyData[dateKey].splice(idx, 1);
+    saveJSON('joy_data', joyData);
+    renderJoy();
+    showToast('已删除');
+  }
+}
+
+function renderJoy() {
+  const dateKey = getDateKey();
+  let joyData = loadJSON('joy_data', {});
+  let todayItems = joyData[dateKey] || [];
+  
+  // 今日计数
+  document.getElementById('joyCount').textContent = todayItems.length;
+  
+  // 今日列表
+  if (todayItems.length === 0) {
+    document.getElementById('joyList').innerHTML = '<div class="empty-state">今天还没有记录<br>记录一件幸运的事吧 ✨</div>';
+  } else {
+    let html = '';
+    todayItems.forEach((item, idx) => {
+      html += '<div class="joy-item"><div class="joy-item-mood">' + item.mood + '</div><div class="joy-item-text">' + item.text + '</div><div class="joy-item-time">' + item.time + '</div><span class="joy-item-del" onclick="deleteJoy(' + idx + ')">✕</span></div>';
+    });
+    document.getElementById('joyList').innerHTML = html;
+  }
+  
+  // 本月日历
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  let calHtml = '';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const hasJoy = joyData[key] && joyData[key].length > 0;
+    const isToday = (key === dateKey);
+    let cls = 'joy-day';
+    if (hasJoy) cls += ' has-joy';
+    if (isToday) cls += ' today';
+    calHtml += '<div class="' + cls + '">' + d + '</div>';
+  }
+  document.getElementById('joyCalendar').innerHTML = calHtml;
+  
+  // 历史记录（最近7天有记录的）
+  let historyHtml = '';
+  let count = 0;
+  for (let i = 1; i <= 30 && count < 10; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (joyData[key] && joyData[key].length > 0) {
+      const dateLabel = String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
+      joyData[key].forEach(item => {
+        historyHtml += '<div class="joy-item"><div class="joy-item-mood">' + item.mood + '</div><div class="joy-item-text">' + item.text + '</div><div class="joy-item-time">' + dateLabel + ' ' + item.time + '</div></div>';
+      });
+      count++;
+    }
+  }
+  if (historyHtml) {
+    document.getElementById('joyHistory').innerHTML = historyHtml;
+  } else {
+    document.getElementById('joyHistory').innerHTML = '<div class="empty-state">还没有回忆<br>记录的幸运事会出现在这里</div>';
+  }
+}
+
+// ===== 概览首页 =====
+function renderOverview() {
+  const dateKey = getDateKey();
+  
+  // 学习
+  let studyData = loadJSON('study_data', {});
+  let todaySeconds = 0;
+  if (studyData[dateKey]) todaySeconds = studyData[dateKey].totalSeconds;
+  let todayHours = todaySeconds / 3600;
+  document.getElementById('overviewStudy').textContent = todayHours.toFixed(1) + 'h';
+  
+  let goalHours = loadJSON('study_goal', 5.0);
+  document.getElementById('overviewStudyGoal').textContent = '目标 ' + goalHours.toFixed(1) + 'h';
+  
+  // 花费
+  let expenseData = loadJSON('expense_data', {});
+  let todayExpense = 0;
+  (expenseData[dateKey] || []).forEach(item => todayExpense += item.amount);
+  document.getElementById('overviewExpense').textContent = '¥' + todayExpense.toFixed(0);
+  
+  let budget = loadJSON('daily_budget', 100);
+  document.getElementById('overviewExpenseBudget').textContent = '预算 ¥' + budget;
+  document.getElementById('budgetInput').value = budget;
+  
+  // 饮食
+  let dietData = loadJSON('diet_data', {});
+  let todayDiet = dietData[dateKey] || { breakfast: [], lunch: [], dinner: [], snack: [] };
+  let mealCount = 0;
+  ['breakfast','lunch','dinner','snack'].forEach(t => { if ((todayDiet[t]||[]).length > 0) mealCount++; });
+  document.getElementById('overviewDiet').textContent = mealCount;
+  
+  // 幸运
+  let joyData = loadJSON('joy_data', {});
+  let todayJoy = (joyData[dateKey] || []).length;
+  document.getElementById('overviewJoy').textContent = todayJoy;
+  
+  // 章节进度
+  let chapterData = loadJSON('chapter_progress', {
+    current: 1, chapters: [
+      { name: '城镇道路工程', done: false, progress: 0 },
+      { name: '城市桥梁工程', done: false, progress: 0 },
+      { name: '城市轨道交通工程', done: false, progress: 0 },
+      { name: '城镇水处理场站工程', done: false, progress: 0 },
+      { name: '城市管道工程', done: false, progress: 0 },
+      { name: '生活垃圾处理工程', done: false, progress: 0 },
+      { name: '施工测量与监控量测', done: false, progress: 0 }
+    ]
+  });
+  let currCh = chapterData.current;
+  let currInfo = chapterData.chapters[currCh - 1] || chapterData.chapters[0];
+  document.getElementById('overviewChapter').textContent = '第' + currCh + '章';
+  document.getElementById('overviewChapterProgress').textContent = currInfo.name + ' · 进度 ' + currInfo.progress + '%';
+  
+  // 渲染章节看板
+  let html = '';
+  chapterData.chapters.forEach((ch, idx) => {
+    let numClass = 'chapter-num';
+    if (ch.done) numClass += ' done';
+    else if (idx + 1 === chapterData.current) numClass += ' current';
+    let fillColor = ch.done ? '#27ae60' : (idx + 1 === chapterData.current ? '#667eea' : '#e9ecef');
+    let statusText = ch.done ? '✅ 已完成' : (idx + 1 === chapterData.current ? '📖 学习中 ' + ch.progress + '%' : '⏳ 未开始');
+    html += '<div class="chapter-item"><div class="' + numClass + '">' + (idx+1) + '</div><div class="chapter-info"><div class="chapter-name">' + ch.name + '</div><div class="chapter-status">' + statusText + '</div></div><div class="chapter-progress"><div class="chapter-progress-fill" style="width:' + (ch.done ? 100 : ch.progress) + '%; background:' + fillColor + ';"></div></div></div>';
+  });
+  document.getElementById('chapterBoard').innerHTML = html;
+  
+  // 智能提醒
+  renderSmartAlerts(todayHours, goalHours, todayExpense, budget, mealCount);
+}
+
+// ===== 智能提醒 =====
+function renderSmartAlerts(studyHours, goalHours, expense, budget, mealCount) {
+  let alerts = [];
+  
+  // 学习不足提醒
+  const now = new Date();
+  const hour = now.getHours();
+  if (hour >= 20 && studyHours < goalHours * 0.5) {
+    alerts.push({ type: 'warning', icon: '⚠️', text: '今天只学了 ' + studyHours.toFixed(1) + 'h，目标 ' + goalHours.toFixed(1) + 'h。离考试还有不多，加油！' });
+  } else if (hour >= 22 && studyHours < goalHours * 0.8) {
+    alerts.push({ type: 'danger', icon: '🚨', text: '今天学习时长不足！仅 ' + studyHours.toFixed(1) + 'h，目标 ' + goalHours.toFixed(1) + 'h。抓紧最后时间！' });
+  } else if (studyHours >= goalHours) {
+    alerts.push({ type: 'success', icon: '🎉', text: '今日学习目标已达成！已学 ' + studyHours.toFixed(1) + 'h，继续保持！' });
+  }
+  
+  // 花费超预算提醒
+  if (expense > budget && budget > 0) {
+    alerts.push({ type: 'danger', icon: '💸', text: '今日花费 ¥' + expense.toFixed(2) + ' 已超出预算 ¥' + budget + '！超支 ¥' + (expense - budget).toFixed(2) + '。' });
+  } else if (expense > budget * 0.8 && budget > 0) {
+    alerts.push({ type: 'warning', icon: '💰', text: '今日已花 ¥' + expense.toFixed(2) + '，接近预算 ¥' + budget + '，注意控制。' });
+  }
+  
+  // 饮食提醒
+  if (hour >= 8 && hour < 11 && mealCount === 0) {
+    alerts.push({ type: 'info', icon: '🍎', text: '还没记录早餐哦，吃了吗？记得记录。' });
+  } else if (hour >= 13 && hour < 15 && mealCount < 2) {
+    alerts.push({ type: 'info', icon: '🍎', text: '午餐吃了什么？记得记录饮食。' });
+  } else if (hour >= 19 && mealCount < 3) {
+    alerts.push({ type: 'info', icon: '🍎', text: '晚餐安排了吗？记得记录。' });
+  }
+  
+  // 倒计时提醒
+  const examDate = new Date('2026-09-13');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const days = Math.ceil((examDate - today) / (1000*60*60*24));
+  if (days <= 30 && days > 0) {
+    alerts.push({ type: 'warning', icon: '⏰', text: '距离一建考试仅剩 ' + days + ' 天！每天坚持，冲刺阶段不能松懈！' });
+  }
+  
+  // 渲染
+  let html = '';
+  alerts.forEach(a => {
+    html += '<div class="smart-alert alert-' + a.type + '"><span class="alert-icon">' + a.icon + '</span><span class="alert-text">' + a.text + '</span></div>';
+  });
+  document.getElementById('smartAlerts').innerHTML = html;
+}
+
+// ===== 学习模块提醒 =====
+function renderStudyAlerts() {
+  const dateKey = getDateKey();
+  let studyData = loadJSON('study_data', {});
+  let todaySeconds = studyData[dateKey] ? studyData[dateKey].totalSeconds : 0;
+  let todayHours = todaySeconds / 3600;
+  let goalHours = loadJSON('study_goal', 5.0);
+  
+  let alerts = [];
+  const now = new Date();
+  const hour = now.getHours();
+  
+  if (hour >= 20 && todayHours < goalHours * 0.5) {
+    alerts.push({ type: 'warning', icon: '⚠️', text: '今日仅学 ' + todayHours.toFixed(1) + 'h / 目标 ' + goalHours.toFixed(1) + 'h，继续加油！' });
+  } else if (todayHours >= goalHours) {
+    alerts.push({ type: 'success', icon: '🎉', text: '今日学习目标已达成！' + todayHours.toFixed(1) + 'h，太棒了！' });
+  }
+  
+  let html = '';
+  alerts.forEach(a => {
+    html += '<div class="smart-alert alert-' + a.type + '"><span class="alert-icon">' + a.icon + '</span><span class="alert-text">' + a.text + '</span></div>';
+  });
+  document.getElementById('studyAlerts').innerHTML = html;
+}
+
+// ===== 花费预算保存 =====
+function saveBudget() {
+  let val = parseFloat(document.getElementById('budgetInput').value);
+  if (!val || val <= 0) { showToast('请输入有效金额'); return; }
+  saveJSON('daily_budget', val);
+  showToast('✅ 预算已设为 ¥' + val);
+  renderOverview();
+}
+
+// ===== 一键复制AI指令 =====
+function copyAIPrompt() {
+  const text = '帮我整理一建市政当前章节的重点知识点，并出5道模拟题让我自测';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 已复制！粘贴到AI对话中即可');
+    }).catch(() => {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function copyNextChapterPrompt() {
+  const chapterData = loadJSON('chapter_progress', { current: 1 });
+  const nextChapter = chapterData.current + 1;
+  const chapterNames = ['城镇道路工程','城市桥梁工程','城市轨道交通工程','城镇水处理场站工程','城市管道工程','生活垃圾处理工程','施工测量与监控量测'];
+  const chName = chapterNames[nextChapter - 1] || '下一章';
+  const text = '我已完成第' + (chapterData.current) + '章的背诵，请帮我生成第' + nextChapter + '章"' + chName + '"的完整知识点详解，格式和第一章一样';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 已复制！粘贴到AI对话中即可');
+    }).catch(() => {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = 0;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('✅ 已复制！粘贴到AI对话中即可'); }
+  catch(e) { showToast('复制失败，请手动复制：' + text); }
+  document.body.removeChild(ta);
+}
+
+// ===== 学习计时器 =====
+let timerRunning = false;
+let timerStart = null;
+let timerInterval = null;
+let elapsedSeconds = 0;
+
+function toggleTimer() {
+  const btn = document.getElementById('timerBtn');
+  const display = document.getElementById('timerDisplay');
+  const label = document.getElementById('timerLabel');
+  
+  if (!timerRunning) {
+    timerRunning = true;
+    timerStart = Date.now();
+    btn.textContent = '结束学习';
+    btn.classList.add('running');
+    label.textContent = '学习中...';
+    timerInterval = setInterval(() => {
+      elapsedSeconds = Math.floor((Date.now() - timerStart) / 1000);
+      const h = String(Math.floor(elapsedSeconds / 3600)).padStart(2,'0');
+      const m = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2,'0');
+      const s = String(elapsedSeconds % 60).padStart(2,'0');
+      display.textContent = h + ':' + m + ':' + s;
+    }, 1000);
+  } else {
+    timerRunning = false;
+    clearInterval(timerInterval);
+    const hours = elapsedSeconds / 3600;
+    
+    // 保存今日学习记录
+    const dateKey = getDateKey();
+    let studyData = loadJSON('study_data', {});
+    if (!studyData[dateKey]) studyData[dateKey] = { totalSeconds: 0, sessions: [] };
+    studyData[dateKey].totalSeconds += elapsedSeconds;
+    studyData[dateKey].sessions.push({
+      start: timerStart,
+      duration: elapsedSeconds
+    });
+    saveJSON('study_data', studyData);
+    
+    btn.textContent = '开始学习';
+    btn.classList.remove('running');
+    btn.classList.add('finished');
+    label.textContent = '本次学习了 ' + hours.toFixed(1) + ' 小时';
+    
+    setTimeout(() => {
+      btn.classList.remove('finished');
+      elapsedSeconds = 0;
+      display.textContent = '00:00:00';
+      label.textContent = '点击开始计时';
+    }, 3000);
+    
+    renderStudyStats();
+    renderWeekCalendar();
+    renderStudyLog();
+    showToast('✅ 已记录 ' + hours.toFixed(1) + 'h 学习');
+  }
+}
+
+// ===== 学习统计 =====
+function renderStudyStats() {
+  const dateKey = getDateKey();
+  let studyData = loadJSON('study_data', {});
+  
+  // 今日
+  let todaySeconds = 0;
+  if (studyData[dateKey]) todaySeconds = studyData[dateKey].totalSeconds;
+  document.getElementById('todayHours').textContent = (todaySeconds / 3600).toFixed(1) + 'h';
+  
+  // 本周
+  let weekSeconds = 0;
+  const today = new Date();
+  const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay();
+  for (let i = 0; i < dayOfWeek; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (studyData[key]) weekSeconds += studyData[key].totalSeconds;
+  }
+  document.getElementById('weekHours').textContent = (weekSeconds / 3600).toFixed(1) + 'h';
+  
+  // 连续打卡
+  let streak = 0;
+  let checkDate = new Date();
+  while (true) {
+    const key = checkDate.getFullYear() + '-' + String(checkDate.getMonth()+1).padStart(2,'0') + '-' + String(checkDate.getDate()).padStart(2,'0');
+    if (studyData[key] && studyData[key].totalSeconds > 0) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  document.getElementById('totalDays').textContent = streak;
+}
+
+// ===== 本周日历 =====
+function renderWeekCalendar() {
+  const labels = ['一','二','三','四','五','六','日'];
+  const today = new Date();
+  const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay();
+  const monday = new Date(today);
+  monday.setDate(monday.getDate() - dayOfWeek + 1);
+  
+  let studyData = loadJSON('study_data', {});
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(d.getDate() + i);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const isToday = (key === getDateKey());
+    const isDone = studyData[key] && studyData[key].totalSeconds > 0;
+    let cls = 'day-circle';
+    if (isDone) cls += ' done';
+    if (isToday) cls += ' today';
+    html += '<div class="day-cell"><div class="day-label">' + labels[i] + '</div><div class="' + cls + '">' + d.getDate() + '</div></div>';
+  }
+  document.getElementById('weekCalendar').innerHTML = html;
+}
+
+// ===== 学习记录列表 =====
+function renderStudyLog() {
+  let studyData = loadJSON('study_data', {});
+  const dateKey = getDateKey();
+  let log = [];
+  
+  // 获取最近7天记录
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (studyData[key] && studyData[key].totalSeconds > 0) {
+      log.push({
+        date: key.slice(5).replace('-','/'),
+        hours: (studyData[key].totalSeconds / 3600).toFixed(1)
+      });
+    }
+  }
+  
+  if (log.length === 0) {
+    document.getElementById('studyLog').innerHTML = '<div class="empty-state">还没有学习记录<br>点击上方"开始学习"计时吧</div>';
+    return;
+  }
+  
+  let html = '';
+  log.forEach(item => {
+    html += '<div class="log-item"><span class="log-date">' + item.date + '</span><span class="log-duration">' + item.hours + 'h ✓</span></div>';
+  });
+  document.getElementById('studyLog').innerHTML = html;
+}
+
+// ===== 花费记录 =====
+let selectedCategory = '餐饮';
+let selectedIcon = '🍜';
+
+document.querySelectorAll('.cat-tag').forEach(tag => {
+  tag.addEventListener('click', function() {
+    document.querySelectorAll('.cat-tag').forEach(t => t.classList.remove('selected'));
+    this.classList.add('selected');
+    selectedCategory = this.dataset.cat;
+    selectedIcon = this.dataset.icon;
+  });
+});
+
+function addExpense() {
+  const name = document.getElementById('expenseName').value.trim();
+  const amount = parseFloat(document.getElementById('expenseAmount').value);
+  
+  if (!name) { showToast('请输入花了什么'); return; }
+  if (!amount || amount <= 0) { showToast('请输入金额'); return; }
+  
+  const dateKey = getDateKey();
+  const monthKey = getMonthKey();
+  let expenseData = loadJSON('expense_data', {});
+  if (!expenseData[dateKey]) expenseData[dateKey] = [];
+  
+  expenseData[dateKey].push({
+    name: name,
+    amount: amount,
+    category: selectedCategory,
+    icon: selectedIcon,
+    time: formatTime()
+  });
+  saveJSON('expense_data', expenseData);
+  
+  document.getElementById('expenseName').value = '';
+  document.getElementById('expenseAmount').value = '';
+  
+  renderExpenses();
+  showToast('✅ 已记录 ¥' + amount.toFixed(2));
+}
+
+function deleteExpense(idx) {
+  const dateKey = getDateKey();
+  let expenseData = loadJSON('expense_data', {});
+  if (expenseData[dateKey]) {
+    expenseData[dateKey].splice(idx, 1);
+    saveJSON('expense_data', expenseData);
+    renderExpenses();
+    showToast('已删除');
+  }
+}
+
+function renderExpenses() {
+  const dateKey = getDateKey();
+  const monthKey = getMonthKey();
+  let expenseData = loadJSON('expense_data', {});
+  
+  // 今日花费
+  let todayTotal = 0;
+  let todayItems = expenseData[dateKey] || [];
+  todayItems.forEach(item => todayTotal += item.amount);
+  document.getElementById('todayExpense').textContent = '¥' + todayTotal.toFixed(2);
+  
+  // 本月花费
+  let monthTotal = 0;
+  Object.keys(expenseData).forEach(key => {
+    if (key.startsWith(monthKey)) {
+      (expenseData[key] || []).forEach(item => monthTotal += item.amount);
+    }
+  });
+  document.getElementById('monthExpense').textContent = '本月累计 ¥' + monthTotal.toFixed(2);
+  
+  // 今日明细
+  if (todayItems.length === 0) {
+    document.getElementById('expenseList').innerHTML = '<div class="empty-state">今日还没有记录<br>记一笔试试吧</div>';
+    return;
+  }
+  
+  let catColors = {
+    '餐饮': '#fff3e0', '交通': '#e3f2fd', '购物': '#f3e5f5',
+    '学习': '#e8f5e9', '日用': '#fff8e1', '其他': '#fafafa'
+  };
+  
+  let html = '';
+  todayItems.forEach((item, idx) => {
+    let bg = catColors[item.category] || '#fafafa';
+    html += '<div class="expense-item"><div class="expense-item-left"><div class="expense-cat-icon" style="background:' + bg + '">' + item.icon + '</div><div class="expense-item-info"><div class="expense-item-name">' + item.name + '</div><div class="expense-item-time">' + item.time + ' · ' + item.category + '</div></div></div><div class="expense-item-amount">¥' + item.amount.toFixed(2) + '</div><span class="expense-delete" onclick="deleteExpense(' + idx + ')">✕</span></div>';
+  });
+  document.getElementById('expenseList').innerHTML = html;
+}
+
+// ===== 饮食记录 =====
+function addMeal(type) {
+  const input = document.getElementById(type + 'Input');
+  const text = input.value.trim();
+  if (!text) { showToast('请输入吃了什么'); return; }
+  
+  const dateKey = getDateKey();
+  let dietData = loadJSON('diet_data', {});
+  if (!dietData[dateKey]) dietData[dateKey] = { breakfast: [], lunch: [], dinner: [], snack: [] };
+  if (!dietData[dateKey][type]) dietData[dateKey][type] = [];
+  
+  dietData[dateKey][type].push({
+    text: text,
+    time: formatTime()
+  });
+  // 记录第一项的时间为餐次时间
+  if (dietData[dateKey][type].length === 1) {
+    dietData[dateKey][type + '_time'] = formatTime();
+  }
+  saveJSON('diet_data', dietData);
+  
+  input.value = '';
+  renderMeals();
+  showToast('✅ 已添加');
+}
+
+function deleteMeal(type, idx) {
+  const dateKey = getDateKey();
+  let dietData = loadJSON('diet_data', {});
+  if (dietData[dateKey] && dietData[dateKey][type]) {
+    dietData[dateKey][type].splice(idx, 1);
+    if (dietData[dateKey][type].length === 0) {
+      delete dietData[dateKey][type + '_time'];
+    }
+    saveJSON('diet_data', dietData);
+    renderMeals();
+    showToast('已删除');
+  }
+}
+
+function renderMeals() {
+  const dateKey = getDateKey();
+  let dietData = loadJSON('diet_data', {});
+  let today = dietData[dateKey] || { breakfast: [], lunch: [], dinner: [], snack: [] };
+  
+  // 统计
+  let bCount = (today.breakfast || []).length;
+  let lCount = (today.lunch || []).length;
+  let dCount = (today.dinner || []).length;
+  document.getElementById('breakfastCount').textContent = bCount;
+  document.getElementById('lunchCount').textContent = lCount;
+  document.getElementById('dinnerCount').textContent = dCount;
+  
+  // 各餐次
+  const meals = [
+    { type: 'breakfast', label: 'breakfast', icon: '🥣' },
+    { type: 'lunch', label: 'lunch', icon: '🍚' },
+    { type: 'dinner', label: 'dinner', icon: '🍲' },
+    { type: 'snack', label: 'snack', icon: '🥤' }
+  ];
+  
+  meals.forEach(m => {
+    const items = today[m.type] || [];
+    const timeKey = m.type + '_time';
+    const time = today[timeKey] || '--:--';
+    document.getElementById(m.type + 'Time').textContent = time;
+    
+    let html = '';
+    items.forEach((item, idx) => {
+      html += '<div class="meal-item"><span class="meal-item-icon">' + m.icon + '</span><span class="meal-item-text">' + item.text + '</span><span style="font-size:11px; color:#aaa; margin-right:8px;">' + item.time + '</span><span class="meal-item-del" onclick="deleteMeal(\'' + m.type + '\',' + idx + ')">✕</span></div>';
+    });
+    document.getElementById(m.type + 'Items').innerHTML = html;
+  });
+}
+
+// ===== 回车快捷添加 =====
+document.getElementById('expenseName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addExpense();
+});
+document.getElementById('expenseAmount').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addExpense();
+});
+['breakfast','lunch','dinner','snack'].forEach(type => {
+  document.getElementById(type + 'Input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addMeal(type);
+  });
+});
+
+// ===== 初始化 =====
+updateCountdown();
+renderOverview();
+renderStudyStats();
+renderWeekCalendar();
+renderStudyLog();
+renderExpenses();
+renderMeals();
+renderJoy();
+renderWork();
+
+// 每30秒更新一次倒计时和概览
+setInterval(() => {
+  updateCountdown();
+  if (document.getElementById('section-overview').classList.contains('active')) {
+    renderOverview();
+  }
+}, 30000);
+</script>
+
+</body>
+</html>
