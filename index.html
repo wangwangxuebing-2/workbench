@@ -1609,6 +1609,24 @@ function switchTab(tab) {
 }
 
 // ===== 工作项目 =====
+// 数据兼容：旧格式 done -> 新格式 siteDone + reportDone
+function migrateWorkData() {
+  let workData = loadJSON('work_data', []);
+  let changed = false;
+  workData.forEach(item => {
+    if (item.done !== undefined && item.siteDone === undefined) {
+      item.siteDone = item.done;
+      item.reportDone = false;
+      delete item.done;
+      changed = true;
+    }
+    if (item.siteDone === undefined) { item.siteDone = false; changed = true; }
+    if (item.reportDone === undefined) { item.reportDone = false; changed = true; }
+  });
+  if (changed) saveJSON('work_data', workData);
+}
+migrateWorkData();
+
 function addWork() {
   const name = document.getElementById('workInput').value.trim();
   const date = document.getElementById('workDate').value;
