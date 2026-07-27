@@ -1309,6 +1309,29 @@ body {
     </div>
   </div>
 
+  <!-- ===== 工作项目模块 ===== -->
+  <div class="work-section" id="section-work">
+
+    <!-- 添加工作项 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> 添加工作项</div>
+      <input type="text" class="work-input" id="workInput" placeholder="项目名称，比如：XX商场消防检测" maxlength="40" style="width:100%; margin-bottom:8px;">
+      <div class="work-input-row">
+        <input type="date" class="work-date-input" id="workDate">
+        <input type="text" class="work-input" id="workNote" placeholder="备注（可选）" maxlength="30">
+        <button class="work-add-btn" onclick="addWork()">添加</button>
+      </div>
+    </div>
+
+    <!-- 工作列表 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🔧</span> 我的工作项</div>
+      <div id="workList">
+        <div class="empty-state">还没有工作项<br>添加一个项目开始记录吧</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== 饮食记录模块 ===== -->
   <div class="diet-section" id="section-diet">
 
@@ -1384,29 +1407,6 @@ body {
         <button class="meal-add-btn" onclick="addMeal('snack')">添加</button>
       </div>
       <div class="meal-items" id="snackItems"></div>
-    </div>
-  </div>
-
-  <!-- ===== 工作项目模块 ===== -->
-  <div class="work-section" id="section-work">
-
-    <!-- 添加工作项 -->
-    <div class="card">
-      <div class="card-title"><span class="icon">📋</span> 添加工作项</div>
-      <input type="text" class="work-input" id="workInput" placeholder="项目名称，比如：XX商场消防检测" maxlength="40" style="width:100%; margin-bottom:8px;">
-      <div class="work-input-row">
-        <input type="date" class="work-date-input" id="workDate">
-        <input type="text" class="work-input" id="workNote" placeholder="备注（可选）" maxlength="30">
-        <button class="work-add-btn" onclick="addWork()">添加</button>
-      </div>
-    </div>
-
-    <!-- 工作列表 -->
-    <div class="card">
-      <div class="card-title"><span class="icon">🔧</span> 我的工作项</div>
-      <div id="workList">
-        <div class="empty-state">还没有工作项<br>添加一个项目开始记录吧</div>
-      </div>
     </div>
   </div>
 
