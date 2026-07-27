@@ -790,6 +790,53 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+.work-steps {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.work-step {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  background: #f8f9fa;
+  color: #888;
+  transition: all 0.2s;
+}
+.work-step.step-done {
+  background: #e8f5e9;
+  border-color: #27ae60;
+  color: #27ae60;
+}
+.work-step.step-current {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  color: #1976d2;
+}
+.work-step-arrow {
+  font-size: 14px;
+  color: #ccc;
+  align-self: center;
+}
+.work-progress-bar {
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.work-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s;
+}
 .work-status-tag {
   font-size: 10px;
   padding: 1px 8px;
@@ -1576,11 +1623,14 @@ function addWork() {
     name: name,
     date: date,
     note: note,
-    done: false,
+    siteDone: false,
+    reportDone: false,
     created: formatTime()
   });
   workData.sort((a, b) => {
-    if (a.done !== b.done) return a.done ? 1 : -1;
+    const aFinish = (a.siteDone && a.reportDone) ? 1 : 0;
+    const bFinish = (b.siteDone && b.reportDone) ? 1 : 0;
+    if (aFinish !== bFinish) return aFinish ? 1 : -1;
     return a.date.localeCompare(b.date);
   });
   saveJSON('work_data', workData);
@@ -1593,18 +1643,37 @@ function addWork() {
   showToast('✅ 已添加工作项');
 }
 
-function toggleWork(id) {
+function toggleSite(id) {
   let workData = loadJSON('work_data', []);
   const item = workData.find(w => w.id === id);
   if (item) {
-    item.done = !item.done;
+    item.siteDone = !item.siteDone;
     workData.sort((a, b) => {
-      if (a.done !== b.done) return a.done ? 1 : -1;
+      const aFinish = (a.siteDone && a.reportDone) ? 1 : 0;
+      const bFinish = (b.siteDone && b.reportDone) ? 1 : 0;
+      if (aFinish !== bFinish) return aFinish ? 1 : -1;
       return a.date.localeCompare(b.date);
     });
     saveJSON('work_data', workData);
     renderWork();
-    showToast(item.done ? '✅ 已标记完成' : '已取消完成');
+    showToast(item.siteDone ? '✅ 已标记"已去现场"' : '已取消');
+  }
+}
+
+function toggleReport(id) {
+  let workData = loadJSON('work_data', []);
+  const item = workData.find(w => w.id === id);
+  if (item) {
+    item.reportDone = !item.reportDone;
+    workData.sort((a, b) => {
+      const aFinish = (a.siteDone && a.reportDone) ? 1 : 0;
+      const bFinish = (b.siteDone && b.reportDone) ? 1 : 0;
+      if (aFinish !== bFinish) return aFinish ? 1 : -1;
+      return a.date.localeCompare(b.date);
+    });
+    saveJSON('work_data', workData);
+    renderWork();
+    showToast(item.reportDone ? '✅ 已标记"已出报告"' : '已取消');
   }
 }
 
@@ -1627,16 +1696,16 @@ function renderWork() {
   
   let html = '';
   workData.forEach(item => {
-    const isDone = item.done;
+    const isFinished = item.siteDone && item.reportDone;
     const isToday = (item.date === todayKey);
-    const isOverdue = !isDone && item.date < todayKey;
+    const isOverdue = !isFinished && item.date < todayKey;
     
     let dateLabel = item.date.slice(5).replace('-','/');
     let dateClass = 'work-date';
     let statusTag = '';
     
-    if (isDone) {
-      statusTag = '<span class="work-status-tag work-tag-done">已完成</span>';
+    if (isFinished) {
+      statusTag = '<span class="work-status-tag work-tag-done">✅ 已完成</span>';
     } else if (isOverdue) {
       dateClass += ' urgent';
       statusTag = '<span class="work-status-tag work-tag-overdue">已逾期</span>';
@@ -1649,10 +1718,33 @@ function renderWork() {
     
     let noteHtml = item.note ? '<div style="font-size:12px; color:#999; margin-top:2px;">📝 ' + item.note + '</div>' : '';
     
-    html += '<div class="work-item">';
-    html += '<div class="work-check' + (isDone ? ' done' : '') + '" onclick="toggleWork(' + item.id + ')">' + (isDone ? '✓' : '') + '</div>';
-    html += '<div class="work-info"><div class="work-name' + (isDone ? ' done' : '') + '">' + item.name + statusTag + '</div><div class="' + dateClass + '">📅 ' + dateLabel + '</div>' + noteHtml + '</div>';
+    // 两节点状态
+    let siteCls = item.siteDone ? 'step-done' : (isFinished ? '' : 'step-current');
+    let reportCls = item.reportDone ? 'step-done' : (item.siteDone && !isFinished ? 'step-current' : '');
+    
+    // 进度条
+    let progress = 0;
+    if (item.siteDone) progress += 50;
+    if (item.reportDone) progress += 50;
+    let barColor = isFinished ? '#27ae60' : (progress > 0 ? '#2196f3' : '#e9ecef');
+    
+    html += '<div class="work-item" style="flex-direction:column; align-items:stretch;">';
+    html += '<div style="display:flex; align-items:center; gap:10px;">';
+    html += '<div style="flex:1;">';
+    html += '<div class="work-name' + (isFinished ? ' done' : '') + '">' + item.name + statusTag + '</div>';
+    html += '<div class="' + dateClass + '">📅 ' + dateLabel + '</div>';
+    html += noteHtml;
+    html += '</div>';
     html += '<span class="work-delete" onclick="deleteWork(' + item.id + ')">✕</span>';
+    html += '</div>';
+    // 两节点
+    html += '<div class="work-steps">';
+    html += '<span class="work-step ' + siteCls + '" onclick="toggleSite(' + item.id + ')">' + (item.siteDone ? '✓ ' : '') + '🏢 已去现场</span>';
+    html += '<span class="work-step-arrow">→</span>';
+    html += '<span class="work-step ' + reportCls + '" onclick="toggleReport(' + item.id + ')">' + (item.reportDone ? '✓ ' : '') + '📄 已出报告</span>';
+    html += '</div>';
+    // 进度条
+    html += '<div class="work-progress-bar"><div class="work-progress-fill" style="width:' + progress + '%; background:' + barColor + ';"></div></div>';
     html += '</div>';
   });
   document.getElementById('workList').innerHTML = html;
