@@ -1095,6 +1095,18 @@ body {
       </div>
     </div>
 
+    <!-- 补录学习时间 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">✏️</span> 补录学习时间</div>
+      <p style="font-size:12px; color:#888; margin-bottom:8px;">昨天忘了计时？在这里补录</p>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <input type="date" class="work-date-input" id="studyAddDate" style="flex:1;">
+        <input type="number" class="expense-input expense-amount-input" id="studyAddHours" placeholder="小时" step="0.5" min="0" max="24" style="width:80px; flex:none;">
+        <span style="font-size:14px; color:#888; align-self:center;">h</span>
+      </div>
+      <button class="expense-btn" style="width:100%; background:#667eea;" onclick="addStudyManual()">补录</button>
+    </div>
+
     <!-- 学习资料 - 第一章知识点 -->
     <div class="card" id="studyMaterialCard">
       <div class="card-title"><span class="icon">📖</span> 第一章 · 城镇道路工程</div>
@@ -1339,6 +1351,12 @@ body {
         <input type="number" class="expense-input expense-amount-input" id="expenseAmount" placeholder="¥金额" step="0.01" min="0">
         <button class="expense-btn" onclick="addExpense()">记一笔</button>
       </div>
+      <!-- 补录日期 -->
+      <div style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; color:#888;">日期：</span>
+        <input type="date" class="work-date-input" id="expenseDate" style="flex:1;">
+        <span style="font-size:11px; color:#aaa;">默认今天，可改日期补录</span>
+      </div>
     </div>
 
     <!-- 今日花费明细 -->
@@ -1352,6 +1370,14 @@ body {
         <span class="budget-label">每日预算：</span>
         <input type="number" class="budget-input" id="budgetInput" placeholder="¥100" step="1" min="0">
         <button class="budget-save-btn" onclick="saveBudget()">设置</button>
+      </div>
+    </div>
+
+    <!-- 历史花费记录 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📅</span> 历史花费</div>
+      <div id="expenseHistory">
+        <div class="empty-state">还没有历史记录</div>
       </div>
     </div>
   </div>
@@ -2065,6 +2091,35 @@ function fallbackCopy(text) {
   document.body.removeChild(ta);
 }
 
+// ===== 学习补录 =====
+function addStudyManual() {
+  const dateInput = document.getElementById('studyAddDate').value;
+  const hours = parseFloat(document.getElementById('studyAddHours').value);
+  
+  if (!dateInput) { showToast('请选择日期'); return; }
+  if (!hours || hours <= 0) { showToast('请输入小时数'); return; }
+  if (hours > 24) { showToast('不能超过24小时'); return; }
+  
+  const seconds = Math.round(hours * 3600);
+  let studyData = loadJSON('study_data', {});
+  if (!studyData[dateInput]) studyData[dateInput] = { totalSeconds: 0, sessions: [] };
+  studyData[dateInput].totalSeconds += seconds;
+  studyData[dateInput].sessions.push({
+    start: Date.now(),
+    duration: seconds,
+    manual: true
+  });
+  saveJSON('study_data', studyData);
+  
+  document.getElementById('studyAddDate').value = '';
+  document.getElementById('studyAddHours').value = '';
+  
+  renderStudyStats();
+  renderWeekCalendar();
+  renderStudyLog();
+  showToast('✅ 已补录 ' + hours + 'h (' + dateInput.slice(5) + ')');
+}
+
 // ===== 学习计时器 =====
 let timerRunning = false;
 let timerStart = null;
@@ -2233,12 +2288,12 @@ document.querySelectorAll('.cat-tag').forEach(tag => {
 function addExpense() {
   const name = document.getElementById('expenseName').value.trim();
   const amount = parseFloat(document.getElementById('expenseAmount').value);
+  const dateInput = document.getElementById('expenseDate').value;
+  const dateKey = dateInput || getDateKey();
   
   if (!name) { showToast('请输入花了什么'); return; }
   if (!amount || amount <= 0) { showToast('请输入金额'); return; }
   
-  const dateKey = getDateKey();
-  const monthKey = getMonthKey();
   let expenseData = loadJSON('expense_data', {});
   if (!expenseData[dateKey]) expenseData[dateKey] = [];
   
@@ -2253,16 +2308,17 @@ function addExpense() {
   
   document.getElementById('expenseName').value = '';
   document.getElementById('expenseAmount').value = '';
+  document.getElementById('expenseDate').value = '';
   
   renderExpenses();
-  showToast('✅ 已记录 ¥' + amount.toFixed(2));
+  showToast('✅ 已记录 ¥' + amount.toFixed(2) + ' (' + dateKey.slice(5) + ')');
 }
 
-function deleteExpense(idx) {
-  const dateKey = getDateKey();
+function deleteExpense(dateKey, idx) {
   let expenseData = loadJSON('expense_data', {});
   if (expenseData[dateKey]) {
     expenseData[dateKey].splice(idx, 1);
+    if (expenseData[dateKey].length === 0) delete expenseData[dateKey];
     saveJSON('expense_data', expenseData);
     renderExpenses();
     showToast('已删除');
@@ -2289,23 +2345,59 @@ function renderExpenses() {
   });
   document.getElementById('monthExpense').textContent = '本月累计 ¥' + monthTotal.toFixed(2);
   
-  // 今日明细
-  if (todayItems.length === 0) {
-    document.getElementById('expenseList').innerHTML = '<div class="empty-state">今日还没有记录<br>记一笔试试吧</div>';
-    return;
-  }
-  
   let catColors = {
     '餐饮': '#fff3e0', '交通': '#e3f2fd', '购物': '#f3e5f5',
     '学习': '#e8f5e9', '日用': '#fff8e1', '其他': '#fafafa'
   };
   
-  let html = '';
-  todayItems.forEach((item, idx) => {
-    let bg = catColors[item.category] || '#fafafa';
-    html += '<div class="expense-item"><div class="expense-item-left"><div class="expense-cat-icon" style="background:' + bg + '">' + item.icon + '</div><div class="expense-item-info"><div class="expense-item-name">' + item.name + '</div><div class="expense-item-time">' + item.time + ' · ' + item.category + '</div></div></div><div class="expense-item-amount">¥' + item.amount.toFixed(2) + '</div><span class="expense-delete" onclick="deleteExpense(' + idx + ')">✕</span></div>';
-  });
-  document.getElementById('expenseList').innerHTML = html;
+  // 今日明细
+  if (todayItems.length === 0) {
+    document.getElementById('expenseList').innerHTML = '<div class="empty-state">今日还没有记录<br>记一笔试试吧</div>';
+  } else {
+    let html = '';
+    todayItems.forEach((item, idx) => {
+      let bg = catColors[item.category] || '#fafafa';
+      html += '<div class="expense-item"><div class="expense-item-left"><div class="expense-cat-icon" style="background:' + bg + '">' + item.icon + '</div><div class="expense-item-info"><div class="expense-item-name">' + item.name + '</div><div class="expense-item-time">' + item.time + ' · ' + item.category + '</div></div></div><div class="expense-item-amount">¥' + item.amount.toFixed(2) + '</div><span class="expense-delete" onclick="deleteExpense(\'' + dateKey + '\',' + idx + ')">✕</span></div>';
+    });
+    document.getElementById('expenseList').innerHTML = html;
+  }
+  
+  // 历史记录（最近14天有记录的）
+  let historyHtml = '';
+  let historyCount = 0;
+  const today = new Date();
+  for (let i = 1; i <= 30 && historyCount < 14; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (expenseData[key] && expenseData[key].length > 0) {
+      let dayTotal = 0;
+      expenseData[key].forEach(item => dayTotal += item.amount);
+      const dateLabel = String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
+      const weekdays = ['日','一','二','三','四','五','六'];
+      const weekLabel = '周' + weekdays[d.getDay()];
+      let isYesterday = (i === 1);
+      
+      historyHtml += '<div style="margin-bottom:12px; padding:10px; background:#f8f9fa; border-radius:8px;">';
+      historyHtml += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">';
+      historyHtml += '<span style="font-size:13px; font-weight:600; color:#555;">' + dateLabel + ' ' + weekLabel + (isYesterday ? '（昨天）' : '') + '</span>';
+      historyHtml += '<span style="font-size:15px; font-weight:700; color:#e67e22;">¥' + dayTotal.toFixed(2) + '</span>';
+      historyHtml += '</div>';
+      
+      expenseData[key].forEach((item, idx) => {
+        let bg = catColors[item.category] || '#fafafa';
+        historyHtml += '<div class="expense-item" style="padding:6px 0;"><div class="expense-item-left"><div class="expense-cat-icon" style="background:' + bg + '; width:26px; height:26px; font-size:14px;">' + item.icon + '</div><div class="expense-item-info"><div class="expense-item-name" style="font-size:13px;">' + item.name + '</div><div class="expense-item-time" style="font-size:10px;">' + item.category + '</div></div></div><div class="expense-item-amount" style="font-size:13px;">¥' + item.amount.toFixed(2) + '</div><span class="expense-delete" onclick="deleteExpense(\'' + key + '\',' + idx + ')">✕</span></div>';
+      });
+      historyHtml += '</div>';
+      historyCount++;
+    }
+  }
+  
+  if (historyHtml) {
+    document.getElementById('expenseHistory').innerHTML = historyHtml;
+  } else {
+    document.getElementById('expenseHistory').innerHTML = '<div class="empty-state">还没有历史记录</div>';
+  }
 }
 
 // ===== 饮食记录 =====
@@ -2398,6 +2490,11 @@ document.getElementById('expenseAmount').addEventListener('keydown', function(e)
 
 // ===== 初始化 =====
 updateCountdown();
+// 设置日期默认值为今天
+const todayDateStr = getDateKey();
+document.getElementById('expenseDate').value = todayDateStr;
+document.getElementById('studyAddDate').value = todayDateStr;
+
 renderOverview();
 renderStudyStats();
 renderWeekCalendar();
